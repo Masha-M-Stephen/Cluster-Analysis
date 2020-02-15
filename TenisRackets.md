@@ -1,13 +1,3 @@
-# Cluster-Analysis
-Clustering Tennis Rackets given their characteristics such as length, weight, balance, swing weight, head size and beam width.
-
-title: "Clustering Tennis Rackets"
-author: "Masha"
-date: "2/14/2020"
-output: 
-   md_document:
-    variant: markdown_github
-    
 You are working as a statistical consultant for a tennis racquet
 manufacturer, helping with some statistical analysis they hope can be of
 use in an upcoming advertising campaign. The company has selected 31 new

@@ -1,0 +1,206 @@
+---
+title: "Clustering Tennis Rackets"
+author: "Masha"
+date: "2/14/2020"
+output: 
+   md_document:
+    variant: markdown_github
+---
+You are working as a statistical consultant for a tennis racquet manufacturer, helping with some
+statistical analysis they hope can be of use in an upcoming advertising campaign. The company
+has selected 31 new models of racquets produced by that company and others and measured six
+variables, which represent various characteristics of the racquets:
+• X1 – length of racquet (in inches)
+• X2 – static weight (in ounces) – this is how much the racquet actually weighs on a scale
+• X3 – balance (in inches) – this is a measure of whether the racquet is heavier in on the
+head end or on the handle end; more negative values indicate a more head-heavy
+racquet; positive values indicate a more head-light racquet; zero indicates an even
+balance.
+• X4 – swing weight – this is a complicated measure of how heavy the racquet feels when
+it is swung.
+• X5 – headsize (in square inches) – the size of the racquet face (the strung area)
+• X6 – beamwidth (in mm) – the width of the cross-section (edge) of the racquet
+
+QUESTION 1.
+Are there particular racquet(s) that are highly unusual in terms of the measured
+characteristics? If so, identify them.
+
+```{r}
+library(MASS)
+library(lattice)
+```
+
+DATA
+```{r}
+Tennis.Racquets = read.csv("C:/Users/fb8502oa/Desktop/Github stuff/Cluster-Analysis/Tennis Racquets.csv")
+head(Tennis.Racquets)
+```
+
+```{r}
+summary(Tennis.Racquets)
+```
+
+looking for outlyers.
+```{r}
+outlyer = boxplot(Tennis.Racquets)$out 
+outlyer
+```
+the outlayers are:
+27.600 (length) = volklorganixv1oversize
+-0.375 (balance) = dunlopBiomimetic700
+125.00 (headsize) = Asics125
+
+
+
+QUESTION 2.
+Are there notable associations/relationships between some of the variables? (if so,
+describe them and present them graphically)
+
+```{r}
+#finding correlation
+library(corrplot)
+
+Tennissub = Tennis.Racquets[, -c(1)]  # this is th subset that works well. 
+Tennissub.cor = cor(Tennissub)
+plot(corrplot(Tennissub.cor, order = "hclust"))
+```
+
+```{r}
+cor(Tennissub)
+```
+
+Static weight and balance are moderately correlated while beam width, length, head size,
+swing weight are strongly correlated.
+
+
+QUESTION 3
+
+Is there a way to graphically represent the raw data for the 31 racquets and draw
+conclusions about the data set from such a graph?
+
+```{r}
+pca = princomp(Tennissub, cor = TRUE)
+summary(pca)
+```
+
+```{r}
+biplot(pca)
+```
+
+Length, beam width and head size are more correlated than swing weight, static weight and
+balance
+22 is an outlier.
+
+QUESTION 4 & QUESTION 5
+  Can we find a few indices that describe the variation in the data set using a lesser
+dimension than the original set of variables?
+
+? If so, what are those indices? Is there a convenient interpretation of any of the indices? 
+
+```{r}
+library(cluster)
+library(factoextra)
+library(FactoMineR)
+Tennissub.mat = scale(Tennissub)
+```
+
+```{r}
+tennis.PCA = PCA(Tennissub.mat, quali.sup = 1)
+```
+
+```{r}
+summary(tennis.PCA)
+```
+
+
+the main area to focus on is 
+```{r}
+summary(pca)
+```
+
+Yes we can find indices that describe the variation in the dataset. The pca values the show total variation are 7. The 7 components explain total variation of the 31 racquets.
+
+QUESTION 6
+Can we graphically display the data in a low number of dimensions using such indices?
+What conclusions about the racquets (individual racquets or groups of racquets) can you
+draw from such a graph
+
+```{r}
+Tennissub.k15 =kmeans(Tennissub,15)
+tennis.kmeans = kmeans(Tennissub.mat, 7)
+fviz_cluster(tennis.kmeans,data=Tennissub)
+```
+```{r}
+plot(fviz_pca_ind(tennis.PCA, col.ind = tennis.kmeans$cluster))
+```
+
+```{r}
+View(Tennis.Racquets)
+```
+
+Question 7.
+Can you find groups/clusters of similar racquets in terms of their characteristics? If so,
+can you find a group of racquets that would be good novice players using the
+specifications listed in part f ? 
+
+
+```{r}
+Tennissub.euc = dist(Tennissub.mat, method = "euclid")
+cluster = agnes(Tennissub.euc, method = "ward")
+```
+
+```{r}
+plot(cluster)
+```
+
+```{r}
+par(ask =F)
+```
+
+```{r}
+# h 
+#k-maeans
+wss = rep(0,8)
+for(i in 1: 8)
+  wss[i] = sum(kmeans(Tennissub.mat, centers = i)$withinss)
+plot(1:8, wss, xlab = "number of cluster", ylab = "wss", type = "b")
+```
+
+
+as you can see, 5 is better than 8.
+```{r}
+Tennissub.k5 = kmeans(Tennissub.mat,5)
+si = silhouette(Tennissub.k5$cluster, Tennissub.euc)
+plot(si)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
